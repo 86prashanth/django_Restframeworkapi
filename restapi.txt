@@ -1,0 +1,1092 @@
+# basic api concepts 
+
+Api: it stands for application programming interface
+ api is a middleman ..
+whenever we have different project this project can be
+different application something need to connect both of them and we have api
+
+it's a set of rules and protocols that allows fiffernt software applications to communiate with each other.
+apis define how diff components of a software system should interact and exchange data..
+they are commonly used to integrate differnt systems create a new application and enhance exciting ones 
+
+the context of api the word aplication referes to any software with a distract function 
+ Interface can be thought of as a contract of service between two applications. 
+This contract defines how the two communicate with each other using requests and responses.
+An API is a set of definitions and protocols for building and integrating application software. 
+It’s sometimes referred to as a contract between an information provider and an information
+ user—establishing the content required from the consumer (the call) and the content required by the producer (the response).
+
+
+types of api: private 
+	partner 
+	public 
+private using with organization 
+partner with using business 
+public using 3rd party application
+
+private api : business login restfulpi --,com.ios,cmd,desk -->db
+
+
+rest:is a set of architectural constraints..
+
+rest :stands for representation state transfer is an architectural style for designing networked applications
+ it is a set of priniciples that guede the desing of web services..
+restful services are stateless meaning that each request from a clinet to a server contains all the information needed to 
+understandaed and process the request..
+rest apis use standard http methods(get,post,put,delete) to perform operations on resources .
+create-post.get -read,update-put,delete-delete(http methods)
+
+
+Restapi: rest is a architecture which follows some patterns for everything 
+so there is a proper architecture to desing our api 
+
+rest-->1 endpoint 2. methods 3. header 4. the body 
+
+restapi(Representational state transfer api) iis an architectural style for desiging netweoked applications.
+rest apis use standard http method(get post put delete) to perfom operations on resources such as retriveing cretaing 
+updating or deleting data.
+they are commonly used in web development to build web services that can be easily consumed by other applications..
+
+api +rest architecture -->restapi 
+1.end points 2.methods (crud) 
+3,header (Status code)
+4.the data(json) 
+ 
+# api with django 
+
+django setup
+# Create the project directory
+mkdir tutorial
+cd tutorial
+
+# Create a virtual environment to isolate our package dependencies locally
+python3 -m venv env
+source env/bin/activate  # On Windows use `env\Scripts\activate`
+
+# installation 
+# Install Django and Django REST framework into the virtual environment
+pip install --pre django
+pip install django
+pip install djangorestframework
+
+python -m pip install --upgrade pip
+
+# Set up a new project with a single application
+django-admin startproject tutorial .  # Note the trailing '.' character
+cd tutorial
+django-admin startapp quickstart
+cd ..
+installtion extenstion: tabnine autocomplete ai 
+django-admin startproject imdb
+django-admin startapp watchlist
+
+#  7 models and migrations
+models.py 
+
+class Movie(models.Model):
+	name=models.CharField(max_length=50
+	description=models.CharField(max_length=200)
+	active=models.BooleanField(default=True)
+	
+	def __str__(self)
+	     return self.name
+admin.py 
+admin.site.register(Movie)
+
+# 8 crating json Responsein view 
+
+Queryset api reference
+-->https://docs.djangoproject.com/en/3.2/ref/models/querysets/#values
+
+Creating jsonResponse
+def movie_list(request):
+	movies=Movie.objects.all()
+	#print(movies)
+	# print(list(movies)
+	# return JsonResponse({'movies':movies})
+	data={'movies':list(movies.values())}
+	return JsonResponse(data)
+
+9) 
+
+# movie _details 
+# movie details 
+def movie_detail(request ,pk):
+    movie=Movie.objects.get(pk=pk) 
+    # specific object will be displayed 
+    data={
+        'name':movie.name,
+        'description':movie.description,
+        'active':movie.active
+    }
+    return JsonResponse(data)
+
+project.urls 
+from django.contrib import admin
+from django.urls import path,include
+
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('movie/',include('watchlist_app.urls')),
+]
+
+app.urls 
+from django.urls import path 
+from watchlist_app.views import *
+
+
+urlpatterns=[ 
+    path('list/',movie_list,name='movielist'),
+    path('<int:pk>/',movie_detail,name='moviedetail'),
+]
+
+
+ 11)  Drf Introduction 
+pip install  DjangoRestFramework
+pip install markdown  # markdown support for the browsarable api
+pip install djagno-filter # filtering support 
+
+# drf serailization and deserialization ...
+Complext data type ==>python native datatype ==> json 
+model objects(serialization) render into json 
+movie.objects.all()
+
+complex datatype-->python native datatype==>json data
+serialization to render into json 
+
+Json data-->python native datatype-->complex data type
+parse data to de serailization 
+
+type of serailizers 
+serializers.Serializses
+serializer,ModelSerializer
+
+
+type of views 
+
+function based view 
+@api_view()
+
+class based view
+
+apiview--> generic views ,mixins,concrete view Classes,viewsets ..
+
+wroking with api 
+drf browsarable 
+postman (3rd party application )
+ httpie(terminal or cmd)
+
+deploy ment 
+
+1 .npm install firebase
+2. npm install -g firebase-tools 
+
+
+# 12 drf project source code 
+
+# 13.serializers get request 
+
+watclist_app.api
+
+views.py
+serializers.py
+urls.py
+
+serializers.py
+ from rest_framework import serializers 
+
+class MovieSerializers(serializers.Serializer)
+	id=serializers.IntegerField(read_only=True)
+	name=serializers.CharField()
+	description=serializers.CharField()
+	active=serializers.BooleanField()
+
+views.py
+from rest_framework.response import Response 
+from watchlist_app.models import *
+from watchlist_app.api.serializers import MovieSerializers 
+from rest_framework.response import api_view 
+
+@api_view()
+def movie_list(request):
+          movie=Moview.objects.all()
+          serializers=MovieSerializers(movie,many=True)
+          return Response(serializers.data)
+
+@api_view()
+def movie_details(request,pk):
+     movie=Movie.objects.get(pk=pk)
+    serializers=MovieSerializers(movie)
+    return Response(serializer.data)
+
+urls.py
+from django.urls import path 
+from watchlist_app.api.views import movie_list 
+
+urlpatterns=[
+	path('list/',movie_list,name='movie_list'),
+	path('<int:pk>,movie_details,name='movie_details)
+]
+
+14.serializers post ,put ,delete
+
+# serializers.py 
+# create 
+def create(self,validated_data):
+     return Movie.objects.create(**validate_data)
+# update 
+def update(self,instance,validated_data):
+     instance.name=validated_data.get('name',instance.name)
+     instance.description=validated_data.get('description',instance.description)
+      instance.active=validated_data.get('active',instance.active)
+      instance.save()
+     return instance
+
+
+views.Py 
+@api_view(['GET','POST','DELETE'])
+def movie_details(request,pk):
+    if request.method=='GET':
+       movie=Movie.objects.get(pk=pk)
+      serializers=MovieSerializers(movie)
+      return Response(serializer.data)
+  if request.method=='POST':
+   movie=Movie.objects.get(pk=pk)
+   serializers=MovieSerializers(movie,data=request.data)
+   if serializers.is_valid():
+        serializer.save()
+       return Response(serializer.data)
+else:
+return Response(serializer.error)
+
+if request.method=='DELETE':
+        movie=Movie.objects.get(pk=pk)
+       movie.delete()
+      return Response(status=204)
+
+# 15 status code 
+100 -199 --> informational 
+200-299--> successful 
+300-399 --> Redirectional 
+400-499->Client Error 
+500->server error 
+
+@api_view(['GET','PUT','DELETE'])
+def movie_details(request,pk):
+    if request.method=='GET':
+        try:
+            movie=Movie.objects.get(pk=pk)
+        except Movie.DoesNotExist:
+            return Response({'error':'Movie Not found'},status=status.HTTP_404_NOT_FOUND)
+        serializer=MovieSerializers(movie)
+        return Response(serializer.data)
+
+if request.method=='PUT':
+        movie=Movie.objects.get(pk=pk)
+        serializer=MovieSerializers(movie,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+        
+    if request.method=='DELETE':
+        movie=Movie.objects.get(pk=pk)
+        movie.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+16.APIVIEW class 
+# class based views 
+
+from rest_framework.views import APIView
+
+Class MovieListAV(APIView):
+      def get(self,request):
+	movies=Movie.objects.all()
+	serializer=MovieSerializers(movie,many=True)
+	return Response(serializer.data)
+
+    def post(self,request):
+        serializer=MovieSerializer(data=request.data)
+        if serializer.is_valid():
+             serializer.save()
+	return Response(serializer.data)
+       else:
+           return Response(serializer.errors)
+
+class MovieDetailAV(APIView):
+    def get(self,request,pk):
+           try:
+	 movie=Movie.objects.get(pk=pk)
+          except Movie.DoesNotExist:
+	 return Response({"error":'movie not found"},status=status.HTTP_404_NOT_FOUND)
+         serializer=MovieSerializers(movie)
+         retunr Response(serializer.data)
+ def put(self,request,pk):
+      movie=Movie.objects.get(pk=pk)
+     serializer=MovieSerializers(movie,data=request.data)
+     if serializer.is_valid():  
+        serializer.save()
+        return Response(serializer.data)
+    else:
+       return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
+
+def delete(self,requests,pk):
+     movie=Movie.objects.get(pk=pk)
+     movie.delete()
+     return Response(status=status.HTTP_204_NO_CONTENT)
+
+# 17 validation 
+def name_length(value):
+    if len(value)<2:
+	raise serializers.ValidationError("name is too short")
+  else:
+     return value 
+
+# validation 
+def validate(self,data):
+    if data['name]==data['description']:
+          raise serializers.ValidationError("title and should be different")
+    else:
+        return data 
+
+# 18 serializers fields and core arguments 
+
+#19 model serializers 
+class MovieSerializers(serializers.ModelSerializer):
+    class Meta:
+    fields="__all__"
+    #fields=['id','name',description']
+     #exclude=['active']
+#20 custom serializer fields 
+
+# 20 Custom serializers fields 
+
+class MovieSerializers(serializers.ModelSerializer):
+     len_name=serializers.SerializerMethodField()
+      class Meta:
+	model=Movie
+             fields="__all__"
+ def get_len_name(self,object):
+        return len(object.name)
+
+#21 . update models 
+class StreamPlatForm(models.Model):
+    name=models.CharField(max_length=30)
+    about=models.CharField(max_length=150)
+    website=models.URLField(max_length=100)
+    
+    def __str__(self):
+        return self.name
+
+
+class WatchList(models.Model):
+    title=models.CharField(max_length=50)
+    storyline=models.CharField(max_length=200)
+    active=models.BooleanField(default=True)
+    created=models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+admin.py
+
+admin.site.register(StreamPlatForm)
+admin.site.register(WatchList)
+
+
+views.py 
+Class StreamPlatFormAV(APIView):
+ 	def get(self,request):
+    	platform=StreamPlatForm.objeccts.all()
+ 	serializer=StreamPlatFormSerializers(platform,many=True)
+	return Response(serializer.data)
+	def post(self,request):
+	      serializer=StreamPlatFormSerializers(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data,status=status.HTTP_201_CREATED )    
+        else:
+            return Response(serializer.errors)
+          
+class WatchDetailAV(APIView):
+    def get(self, request, pk):
+        try:
+            movie=WatchList.objects.get(pk=pk)
+        except WatchList.DoesNotExist:
+            return Response({"error":'Movie not Found'},status=status.HTTP_404_NOT_FOUND)
+        serializer=WatchListSerializers(movie)
+        return Response(serializer.data)
+    
+    def put(self,request,pk):
+        movie=WatchList.objects.get(pk=pk)
+        serializer=WatchListSerializers(movie,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def delete(self,request,pk):
+        movie=WatchList.objects.get(pk=pk)
+        movie.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+
+class WatchListAV(APIView):
+    def get(self,request):
+        movies=WatchList.objects.all()
+        serializer=WatchListSerializers(movies,many=True)
+        return Response(serializer.data)
+    
+    def post(self,request):
+        serializer=WatchListSerializers(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
+
+class StreamPlatFormDetailAV(APIView):
+    def get(self, request, pk):
+        try:
+            movie=StreamPlatForm.objects.get(pk=pk)
+        except StreamPlatForm.DoesNotExist:
+            return Response({"error":'Movie not Found'},status=status.HTTP_404_NOT_FOUND)
+        serializer=StreamPlatFormSerializers(movie)
+        return Response(serializer.data)
+    
+    def put(self,request,pk):
+        movie=StreamPlatForm.objects.get(pk=pk)
+        serializer=StreamPlatFormSerializers(movie,data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+    def delete(self,request,pk):
+        movie=StreamPlatForm.objects.get(pk=pk)
+        movie.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+urls.py
+urlpatterns=[
+    path('list/',WatchListAV.as_view(),name='movie_list'),
+    path('<int:pk>',WatchDetailAV.as_view(),name='movie_details'),
+    path('stream/',StreamplatFormAV.as_view(),name='stream'),
+path("<int:pk>/,StreamPlatFormDetailAv.as_view(),name='strem_detaiils')
+]
+#22 Django relationship
+many-to-many relationship
+one-to-one relationship
+many-to-one relationship
+# remove all data from admin 
+   platform=models.ForeignKey(StreamPlatForm,on_delete=models.CASCADE,related_name='watchlist')
+makemigrations
+migrate
+
+#23 nested serializers 
+# class StreamPlatFormSerializers(serializers.ModelSerializer):
+watchlist=WatchListSerializers(many=True,read_only=True)
+    
+    class Meta:
+        model=StreamPlatForm
+        fields="__all__"   
+
+#24 serializer relations
+class StreamPlatFormSerializers(serializers.ModelSerializer):
+    #watchlist=WatchListSerializers(many=True,read_only=True)
+     watchlist=serializers.StringRelatedField(many=True)
+     watchlist=serializers.PrimaryKeyRelatedField(many=True,read_only=True)
+    watchlist=serializers.HyperlinkedRelatedField(many=True,read_only=True,view_name='movie_details') # urls
+    
+    class Meta:
+        model=StreamPlatForm
+        fields="__all__"   
+
+#25 Hyperlinked model serializer 
+
+The hyperlinkedmodelserializer class is similart to the modelserializer class except that it users 
+hyperlinks to represent relationships, rather than primary keys ..
+
+# class StreamPlatFormSerializers(serializers.HyperlinkedModelSerializer):
+    watchlist=WatchListSerializers(many=True,read_only=True)
+
+#26 serializer relations 
+ 
+models.py
+
+class Review(models.Model):
+    rating=models.PositiveIntegerField(validators=[MinValueValidator(1),MaxValueValidator(5)])
+    description=models.CharField(max_length=200,null=True)
+    active=models.BooleanField(default=True)
+    watchlist=models.ForeignKey(WatchList,on_delete=models.CASCADE,related_name='reviews')
+    created=models.DateTimeField(auto_now_add=True)
+    update=models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return str(self.rating) + " "+self.watchlist.title
+
+class ReviewSerializers(serializers.ModelSerializer):
+    class Meta:
+        model=Review
+        fields="__all__"
+       fields="__all__"
+class WatchListSerializers(serializers.ModelSerializer):
+    reviews = ReviewSerializers(many=True,read_only=True)
+    # len_name=serializers.SerializerMethodField()
+    class Meta:
+        model=WatchList 
+        fields="__all__"
+
+#27 Generic api view and mixins 
+from rest_framework import status,generics,mixins 
+
+class ReviewList(mixins.ListModelMixin,mixins.CreateModelMixin,generics.GenericAPiView)
+	queryset=Review.objects.all()
+	serializer_class=ReviewSerializers 
+ def get(self,request,*args,**kwargs):
+	return self.list(request,*args,**kwargs)
+def post(self,request,*args,**kwargs):
+  	return self.create(request,*args,**kwargs)
+
+class ReviewDetail(mixins.RetrieveModelMixin,generics.GenericAPIView):
+    queryset=Review.objects.all() 
+    serializer_class=ReviewSerializers
+    def get(self,request,*args,**kwargs):
+        return self.retrieve(request,*args,**kwargs)
+
+#28 urlstructure
+   # path('review/',ReviewList.as_view(),name='review'),
+    path('stream/<int:pk>/review',StreamDetailAV.as_view(),name='streamplatform-detail'),
+    path('stream/review/<int:pk>/',ReviewDetail.as_view(),name='reviewdetial')
+
+#29 concrete view classess
+class ReviewList(generics.ListCreateAPIView):
+    queryset=Review.objects.all()
+    serializer_class=ReviewSerializers
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Review.objects.all()
+    serializer_class=ReviewSerializers
+
+#30 0verwrite queryset
+class ReviewList(generics.ListCreateAPIView):
+	# queryset=Review.objects.all()
+	serializer_class=ReviewSerializer	
+	def get_queryset(self):
+	     pk=self.kwargs['pk]
+	     return Review.objects.filter(watchlist=pk)
+
+
+#.ReviewCreate
+views.py
+class ReviewCreate(generics.CreateAPIView):
+    # queryset = Review.objects.all()
+    serializer_class=ReviewSerializers
+    def perform_create(self,serializer):
+        pk=self.kwargs.get('pk')
+        watchlist=WatchList.objects.get(pk=pk)
+        serializer.save(watchlist=watchlist)
+
+# 31 viewsets and routers 
+views.py
+class StreamPlatFormVS(viewsets.ViewSet):
+    def list(self,request):
+        queryset=StreamPlatForm.objects.all()
+        serializer=StreamPlatFormSerializers(queryset,many=True,context={'request':request})
+        return Response(serializer.data)
+    def retrive(self,request,pk=None):
+        queryset=StreamPlatForm.objects.all()
+        watchlist=get_object_or_404(queryset,pk=pk)
+        serializer=StreamPlatFormSerializers(watchlist)
+        return Response(serializer.data)
+    
+urls.py
+from rest_framework.routers import DefaultRouter
+router=DefaultRouter()
+router.register('streamvs',StreamPlatFormVS,basename='streamplatform'),
+path('',include(router.urls)
+
+# model viewsets 
+# class StreamPlatFormSv(viewsets.ModelViewSet):
+class StreamPlatFormSv(viewsets.ReadOnlyModelViewSet):
+    queryset=StreamPlatForm.objects.all()
+    serializer_class=StreamPlatFormSerializers
+
+urls.py
+router=DefaultRouter()
+# router.register('streamvs',StreamPlatFormVS,basename='streamplatform'),
+router.register('streamvs',StreamPlatFormSv,basename='streamplatform'),
+
+
+
+# 32 .ModelViewSet
+class StreamPlatFormSv(viewsets.ReadOnlyModelViewSet):
+    queryset=StreamPlatForm.objects.all()
+    serializer_class=StreamPlatFormSerializers
+
+# 33.Postman
+#34 user model
+from django.contrib.auth.models import User
+
+Class Review(models.Model):
+	review_user=models.ForeignKey(User,On_delete=Models.CASACADE)
+
+before it write remove all models from database(admin)
+makemigrations
+migrate
+class ReviewCreate(generics.CreateAPIView):
+    # queryset = Review.objects.all()
+    serializer_class=ReviewSerializers
+
+    def get_queryset(self):
+        return Review.objects.all()
+
+    def perform_create(self,serializer):
+        pk=self.kwargs.get('pk')
+        watchlist=WatchList.objects.get(pk=pk)
+        review_user=self.request.user
+        review_queryset=Review.objects.filter(watchlist=watchlist,review_user=review_user)
+        if review_queryset.exists():
+            raise ValidationError("You have already reviewed this movie")
+        serializer.save(watchlist=watchlist,review_user=review_user)
+
+# 35 temporary login and logout
+
+projects.urls.py
+path('api-auth',include('rest_framework.urls'))
+
+# 36 introduction to permissions 
+# settings.py 
+ REST_FRAMEWORK={
+     'DEFAULT_PERMISSION_CLASSES':[
+         # 'rest_framework.permissions.IsAuthenticated', # authenticateion credentials were not provided
+         'rest_framework.permissions.IsAdminUser', # authenticateion credentials were not provided# global settings
+     ]
+ }
+views.py
+
+class ReviewList(generics.ListAPIView):
+    # queryset=Review.objects.all()
+    serializer_class=ReviewSerializers
+    permission_classes=[IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        pk=self.kwargs['pk']
+        return Review.objects.filter(watchlist=pk)
+    
+
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Review.objects.all()
+    serializer_class=ReviewSerializers
+    permission_classes=[IsAuthenticated]
+#viewsets and routers 
+
+#37 custom permissions
+permissions.py
+class AdminOrReadOnly(permissions.BasePermission):
+    """Allow access only to admin user"""
+    def has_permission(self, request, view):
+        # admin_permission=super().has_permission(request,view)
+        # admin_permission=bool(request.user and request.user.is_staff)
+        # return request.method=="GET" or admin_permission
+        if request.method in permissions.SAFE_METHODS:
+            return True 
+        else:
+            return bool(request.user and request.user.is_staff)
+    
+class ReviewUserOrReadOnly(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True 
+        else:
+            return bool(request.user and request.user.is_staff)
+
+
+views.py
+class ReviewDetail(generics.RetrieveUpdateDestroyAPIView):
+    queryset=Review.objects.all()
+    serializer_class=ReviewSerializers
+    # permission_classes=[IsAuthenticated]
+    permission_classes=[AdminOrReadOnly]
+    # permission_classes=[ReviewUserOrReadOnly]
+
+#38. custom review calculation 
+
+delete the all reviews  and watchlist 
+models.py
+
+
+class WatchList(models.Model):
+    title=models.CharField(max_length=50)
+    storyline=models.CharField(max_length=200)
+    platform=models.ForeignKey(StreamPlatForm,on_delete=models.CASCADE,related_name='watchlist')
+    active=models.BooleanField(default=True)
+    avg_rating=models.FloatField(default=0)
+    number_rating=models.IntegerField(default=0)
+    created=models.DateTimeField(auto_now_add=True)
+    
+    def __str__(self):
+        return self.title
+
+
+views.py
+class ReviewCreate(generics.CreateAPIView):
+    # queryset = Review.objects.all()
+    serializer_class=ReviewSerializers
+    def get_queryset(self):
+        return Review.objects.all()
+    def perform_create(self,serializer):
+        pk=self.kwargs.get('pk')
+        watchlist=WatchList.objects.get(pk=pk)
+        review_user=self.request.user
+        review_queryset=Review.objects.filter(watchlist=watchlist,review_user=review_user)
+        if review_queryset.exists():
+            raise ValidationError("You have already reviewed this movie")
+        if watchlist.number_rating==0:
+            watchlist.avg_rating=serializer.validated_data['rating']
+        else:
+            watchlist.avg_rating=(watchlist.avg_rating+serializer.validated_data['rating'])/2
+        watchlist.number_rating=watchlist.number_rating+1
+        watchlist.save()
+        serializer.save(watchlist=watchlist,review_user=review_user)
+    
+39 # introduction authentication ..
+40 # Basic authentication...
+
+settings.py 
+
+REST_FRAMEWORK={
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.BasicAuthentication',
+    ]
+ }
+views.py 
+class ReviewList(generics.ListAPIView):
+    # queryset=Review.objects.all()
+    serializer_class=ReviewSerializers
+    # permission_classes=[IsAuthenticatedOrReadOnly]
+    permission_classes=[IsAuthenticated]
+    
+    def get_queryset(self):
+        pk=self.kwargs['pk']
+        return Review.objects.filter(watchlist=pk)
+    
+postman :
+ headers :
+autherization : username password username:password base64 encode 
+basic base64encode 
+
+# 41 Token authentication part1 
+this authentication sscheme uses a simple token based http authentication scheme 
+tokent authentication is appropriate for client -server such as native desktop and mobile clients 
+to use the Tokenauthentication scheme you'll  need to configuration the authentication classes to include tokenauthentication,
+and additionaly include rest_framework.auth token in your sinstatled _Apps 
+
+seettings.py
+REST_FRAMEWORK={
+    # 'DEFAULT_AUTHENTICATION_CLASSES':[
+    #     'rest_framework.authentication.BasicAuthentication',
+    # ],
+    'DEFAULT_AUTHENTICATION_CLASSES':[
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+ }
+installed apps
+    'rest_framework.authtoken',
+manage.py migrate for usinng sepearte table
+create token manually 
+# 42 token authentication part 2
+postman
+ instead user using we have to use token 
+
+# 43 Token authentication part3 
+create a application for token generate
+-->py manage.py startapp user_app.api 
+urls.py. serializers.py views.py
+ urls.py 
+
+from rest_framework.authtoken.views import obtain_auth_token 
+from django.urls iimport path 
+urlpatterns=[
+	path('login/',obtain_auth_token,name='login'),
+]
+
+https://127.0.0.8000/accounts/login/
+
+body form-data: username  password token will generate automatice 
+autherization token generate token paster
+
+copy paste
+
+# 44 Token authentication part 4 registrztion ,login.get token 
+
+serializers.py 
+from django.contrib.auth.models import User 
+from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
+
+
+class RegistrationSerializer(serializers.ModelSerializer):
+    password2=serializers.CharField(style={'input_type':'password'},write_only=True)
+    class Meta:
+        model=User
+        fields=['username','email','password','password2']
+        extra_kwargs={
+            'password':{'write_only':True}
+        }
+    def save(self):
+        password=self.validated_data['password']
+        password2=self.validated_data['password2']
+        if password!=password2:
+            raise ValidationError({'error':'p1 and p2 should be same'})
+        if User.objects.filter(email=self.validated_data['email']).exists():
+            raise serializers.ValidationError({'error':'Email alreday Exists!'})
+        
+        account=User(email=self.validated_data['email'], username=self.validated_data['username'])
+        account.set_password(password)
+        account.save()     
+        return account
+
+views.py 
+from rest_framework.decorators import api_view 
+from rest_framework.response import Response
+from user_app.api.serializers import RegistrationSerializer
+
+@api_view(['POST'])
+def registration_view(request):
+    if request.method=='POST':
+        serializer=RegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        
+
+urls.py 
+register 
+
+# post man create credentials body form data 
+username email password password2 
+login through what you have get credential 
+after login u will get some token 
+autherization token add it you will get all access ..
+
+# 45 token authentication generate 
+
+models.py
+
+from django.conf import settings
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from rest_framework.authtoken.models import Token
+
+@receiver(post_save, sender=settings.AUTH_USER_MODEL)
+def create_auth_token(sender, instance=None, created=False, **kwargs):
+    if created:
+        Token.objects.create(user=instance)
+
+
+views.py 
+from rest_framework.decorators import api_view 
+from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from user_app.api.serializers import RegistrationSerializer
+
+@api_view(['POST',])
+def registration_view(request):
+    if request.method=='POST':
+        serializer=RegistrationSerializer(data=request.data)
+        data={}
+        if serializer.is_valid():
+            account=serializer.save()
+            data['response']= "Registration Sucessful!"
+            data['username']= account.username
+            data['email']= account.email
+            token=Token.objects.get(user=account).key 
+            data['token']=token
+        else:
+            data=serializer.errors
+            
+        return Response(data)
+        
+# token will be automaticall y geenerate 
+
+# 46 how to delete a token 
+@api_view(['POST',])
+def logout_view(request):
+    if request.method=='POST':
+        request.user.auth_token.delete()
+        return Response(status=status.HTTP_200_OK)
+automatically genereate create 
+
+# 49 jwt autherntication jwt : 
+pip install djangorestframework-simplejwt
+
+settings.py
+REST_FRAMEWORK = {
+    ...
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        ...
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+    ...
+}
+
+
+urls.py 
+from rest_framework_simplejwt.views import (
+    TokenObtainPairView,
+    TokenRefreshView,
+)
+
+urlpatterns = [
+    ...
+    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    ...
+]
+
+# 50 login 
+
+# 51 registrations
+
+# refresh token 
+from rest_framework_simplejwt.tokens import RefreshToken
+
+
+@api_view(['POST',])
+def registration_view(request):
+    if request.method=='POST':
+        serializer=RegistrationSerializer(data=request.data)
+        data={}
+        if serializer.is_valid():
+            account=serializer.save()
+            data['response']= "Registration Sucessful!"
+            data['username']= account.username
+            data['email']= account.email
+            # token=Token.objects.get(user=account).key 
+            refresh=RefreshToken.for_user(account)
+            data['token']={'refresh' :str(refresh),
+                           'access':str(refresh.access_token),
+                            }
+        else:
+            data=serializer.errors           
+        return Response(data)
+
+# 52 Throtling 
+
+jwt comment
+throtling  types anonymous user throttling
+	user throtlling
+	custom throtlling 
+#53 throttle rate(Annon and user)
+
+settings.py 
+ 'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle', # its global 
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/day',
+        'user': '1000/day'
+    }
+
+views.py 
+from rest_framework.throttling import UserRateThrottle,AnnoteThrottle
+   throttle_classes = [UserRateThrottle,Anonate Throttle]
+
+#54  custom throttliing 
+throttling.py
+
+from rest_framework.throttling import UserRateThrottle
+
+
+class ReviewCreateThrottle(UserRateThrottle):
+    scope='review-create'
+    
+class ReviewListThrottle(UserRateThrottle):
+    scope='review-list'
+
+views.py 
+from watchlist_app.api.throttling import * 
+throttling_class= ReviewcreateThrottle
+
+# 55 filtering introoduction 
+-->filter
+--->search
+-->Order 
+# filtering 
+views.py
+
+class UserReview(generics.ListAPIView):
+    # queryset = Review.objects.all()
+    serializer_class=ReviewSerializers
+    # permission_classes=[IsAuthenticated]
+    # # throttle_classes=[ReviewCreateThrottle,ReviewListThrottle]
+    def get_queryset(self):
+        # username=self.kwargs['username']
+        username=self.request.query_params.get('username',None)
+        return Review.objects.filter(review_user__username=username)
+    # def get_queryset(self):
+    #     queryset = Review.objects.all()
+    #     username=self.request.query_params.get('username',None)
+    #     if username is not None:
+    #         queryset=queryset.filter(purchaser__username=username)
+    #     return queryset
+
+urls.py
+ path('review/<str:username>/',UserReview.as_view(),name='user_review_detail'),
+
+
+
+# 56 django filter 
+from django_filters.rest_framework import DjangoFilterBackend
+
+
+class Watchlist(generics.ListAPIView):
+    queryset=WatchList.objects.all()
+    serializer_class=WatchListSerializers
+    filter_backends=[DjangoFilterBackend]
+    filterset_filds=['title','platform__name']
+
+
+urls.py add this views.py 
+form rest_framework import filters
+
+
+# pagination 
+
+settings.py 
+'DEFAULT_THROTTLE_RATES': {
+        'anon': '5/day',
+        'user': '10/day',
+        'review-create':'1/day',
+        'review-list':'10/day',
+    },
+    'DEFAULT_PAGINATION_CLASS':'rest_framework.pagination.LimitOffsetPagination',
+    'PAGE_SIZE':10,
+
+pagination.py
+
+
+from rest_framework.pagination import PageNumberPagination,LimitOffsetPagination,CursorPagination
+
+class WatchListPagination(PageNumberPagination):
+    page_size=3
+    page_query_param='p'
+    page_size_query_param='size'
+    max_page_size=10
+    last_page_string='end'
+
+class watchLpagination(LimitOffsetPagination):
+    default_limit=5
+    page_size=3
+    limit_query_param='param'
+    
+class WatchCpagination(CursorPagination):
+    page_size=4
+    cursor_query_param="record"
+    ordering='-created'
+    
